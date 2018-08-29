@@ -50,7 +50,7 @@ open class TenClock : UIControl{
         r.instanceCount = 48
         r.instanceTransform =
             CATransform3DMakeRotation(
-                CGFloat(2*M_PI) / CGFloat(r.instanceCount),
+                CGFloat(2 * Double.pi) / CGFloat(r.instanceCount),
                 0,0,1)
 
         return r
@@ -61,25 +61,25 @@ open class TenClock : UIControl{
         r.instanceCount = 12
         r.instanceTransform =
             CATransform3DMakeRotation(
-                CGFloat(2*M_PI) / CGFloat(r.instanceCount),
+                CGFloat(2 * Double.pi) / CGFloat(r.instanceCount),
                 0,0,1)
 
         return r
     }()
-    let twoPi =  CGFloat(2 * M_PI)
-    let fourPi =  CGFloat(4 * M_PI)
+    let twoPi =  CGFloat(2 * Double.pi)
+    let fourPi =  CGFloat(4 * Double.pi)
     var headAngle: CGFloat = 0{
         didSet{
-            if (headAngle > fourPi  +  CGFloat(M_PI_2)){
+            if (headAngle > fourPi  +  CGFloat(Double.pi / 2)){
                 headAngle -= fourPi
             }
-            if (headAngle <  CGFloat(M_PI_2) ){
+            if (headAngle <  CGFloat(Double.pi / 2) ){
                 headAngle += fourPi
             }
         }
     }
 
-    var tailAngle: CGFloat = 0.7 * CGFloat(M_PI) {
+    var tailAngle: CGFloat = 0.7 * CGFloat(Double.pi) {
         didSet{
             if (tailAngle  > headAngle + fourPi){
                 tailAngle -= fourPi
@@ -102,14 +102,20 @@ open class TenClock : UIControl{
     open var titleColor = UIColor.lightGray
     open var titleGradientMask = false
 
+    open var gradientStartColor: UIColor? = .blue
+    open var gradientEndColor: UIColor? = UIColor.blue.withAlphaComponent(0.3)
+    
+    open var centerTitleFont: UIFont?
+    open var controlsFont: UIFont?
+    
     //disable scrol on closest superview for duration of a valid touch.
     var disableSuperviewScroll = false
 
     open var headBackgroundColor = UIColor.white.withAlphaComponent(0.8)
     open var tailBackgroundColor = UIColor.white.withAlphaComponent(0.8)
 
-    open var headText: String = "Start"
-    open var tailText: String = "End"
+    open var headText: String = "Sleep"
+    open var tailText: String = "Wake"
 
     open var headTextColor = UIColor.black
     open var tailTextColor = UIColor.black
@@ -198,13 +204,13 @@ open class TenClock : UIControl{
         let components = self.calendar.dateComponents(units, from: date)
         let min = Double(  60 * components.hour! + components.minute! )
 
-        return medStepFunction(CGFloat(M_PI_2 - ( min / (12 * 60)) * 2 * M_PI), stepSize: CGFloat( 2 * M_PI / (12 * 60 / 5)))
+        return medStepFunction(CGFloat((Double.pi / 2) - ( min / (12 * 60)) * 2 * Double.pi), stepSize: CGFloat( 2 * Double.pi / (12 * 60 / 5)))
     }
 
     // input an angle, output: 0 to 4pi
     func angleToTime(_ angle: Angle) -> Date{
         let dAngle = Double(angle)
-        let min = CGFloat(((M_PI_2 - dAngle) / (2 * M_PI)) * (12 * 60))
+        let min = CGFloat((((Double.pi / 2) - dAngle) / (2 * Double.pi)) * (12 * 60))
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return self.calendar.date(byAdding: .minute, value: Int(medStepFunction(min, stepSize: 5/* minute steps*/)), to: startOfToday)!
     }
@@ -245,11 +251,7 @@ open class TenClock : UIControl{
     }
     func updateGradientLayer() {
 
-        gradientLayer.colors =
-            [tintColor,
-                tintColor.modified(withAdditionalHue: -0.08, additionalSaturation: 0.15, additionalBrightness: 0.2)]
-                .map(disabledFormattedColor)
-                .map{$0.cgColor}
+        gradientLayer.colors = [gradientStartColor, gradientEndColor].map{ $0?.cgColor }
         gradientLayer.mask = overallPathLayer
         gradientLayer.startPoint = CGPoint(x:0,y:0)
     }
@@ -333,7 +335,7 @@ open class TenClock : UIControl{
         let cgFont = CTFontCreateWithName(f.fontName as CFString?, f.pointSize/2,nil)
         let startPos = CGPoint(x: numeralsLayer.bounds.midX, y: 15)
         let origin = numeralsLayer.center
-        let step = (2 * M_PI) / 12
+        let step = (2 * Double.pi) / 12
         for i in (1 ... 12){
             let l = CATextLayer()
             l.bounds.size = CGSize(width: i > 9 ? 18 : 8, height: 15)
